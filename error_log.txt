@@ -1,0 +1,6 @@
+Syntax Error
+Indentation Error
+Name Error- 
+ Index Error
+Something Else
+Import Error
