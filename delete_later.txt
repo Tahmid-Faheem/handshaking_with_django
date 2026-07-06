@@ -1,2 +1,5 @@
 Some trivial text.
 THis line is a change itself.
+
+Already checked git pull. [Sync local repo with no control or justification]
+Now it is time for git fetch + git merge. []
