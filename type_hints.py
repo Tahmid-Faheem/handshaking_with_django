@@ -14,6 +14,11 @@ def find_user(user_id: int) -> Optional[dict]:
 
 print(find_user(1))
 
+# Modern way
+def sells(id: int) -> dict | None:
+    db = {12: {"Name": "Wholesell"}}
+    return db[12]
+
 # Dataclass as shortcut of large classes
 from dataclasses import dataclass
 
