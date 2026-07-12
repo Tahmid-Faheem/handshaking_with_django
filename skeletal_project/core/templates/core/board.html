@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal Django + DRF</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-5">
+    <div class="container" style="max-width: 600px;">
+        <h2 class="mb-4">System Notes</h2>
+
+        <!-- 1. The Input Form -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <form id="noteForm">
+                    <!-- Django requires a CSRF token for security on all POST requests -->
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" id="noteText" class="form-control" placeholder="Type a new note..." required>
+                        <button type="submit" class="btn btn-primary">Save Note</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. The Data List (Rendered by Django on initial page load) -->
+        <ul class="list-group shadow-sm" id="noteList">
+            {% for note in notes %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ note.text }}
+                    <span class="text-muted small">{{ note.created_at|date:"M d, Y" }}</span>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted text-center" id="emptyMessage">No notes yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 3. The JavaScript (Connects HTML to DRF) -->
+    <script>
+        document.getElementById('noteForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Stop the page from reloading
+            
+            const textInput = document.getElementById('noteText');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // Send a POST request to the DRF API we built in Step 4
+            fetch('/api/notes/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Pass the security token
+                },
+                body: JSON.stringify({ text: textInput.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Clear the input field
+                textInput.value = '';
+
+                // Remove the "No notes yet" message if it exists
+                const emptyMsg = document.getElementById('emptyMessage');
+                if (emptyMsg) emptyMsg.remove();
+
+                // Build a new list item and inject it into the UI instantly
+                const newListItem = `
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-success bg-opacity-10">
+                        ${data.text}
+                        <span class="text-muted small">Just now</span>
+                    </li>
+                `;
+                document.getElementById('noteList').insertAdjacentHTML('afterbegin', newListItem);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
